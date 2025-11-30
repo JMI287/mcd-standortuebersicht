@@ -3,23 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>McDonald's Standorte Deutschland</title>
+    <title>McDonald's Restaurants</title>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mcdYellow: '#ffbc0d',
+                        mcdRed: '#db0007',
+                        mcdGreen: '#295236',
+                        mcdDark: '#202020'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        #map { 
-            height: 90vh; 
-            width: 100%;
-        }
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 0; 
-            text-align: center;
-        }
+        /* Custom Scrollbar für die Liste */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #ffbc0d; }
     </style>
 </head>
-<body>
-    <h1>🍔 McDonald's Standorte in Deutschland</h1>
-    <div id="map"></div>
+<body class="bg-gray-100 h-screen flex flex-col font-sans overflow-hidden">
+
+    <header class="bg-white p-4 shadow-md z-30 flex justify-between items-center h-16 shrink-0 relative">
+        <div class="flex items-center gap-3">
+            <div class="bg-mcdRed w-9 h-9 rounded flex items-center justify-center text-mcdYellow font-bold text-xl shadow-sm">M</div>
+            <h1 class="text-xl font-bold text-gray-800 tracking-tight">Restaurant Finder</h1>
+        </div>
+        <button id="btn-toggle-favs" class="text-sm font-semibold text-gray-600 bg-gray-50 px-4 py-2 rounded-full border border-gray-200 hover:bg-mcdYellow hover:text-black hover:border-mcdYellow transition shadow-sm">
+            <i class="fa-regular fa-heart mr-2"></i> Favoriten
+        </button>
+    </header>
+
+    <div class="flex-1 flex flex-row overflow-hidden relative">
+        
+        <div class="w-[400px] min-w-[300px] bg-white border-r border-gray-200 flex flex-col z-20 shadow-xl h-full">
+            
+            <div class="p-4 border-b border-gray-100 bg-gray-50">
+                <h2 id="list-title" class="text-sm font-bold text-gray-500 uppercase tracking-wider">Alle Standorte</h2>
+                <p class="text-xs text-gray-400 mt-1">Sortiert nach Entfernung zu Ravensburg</p>
+            </div>
+
+            <div id="restaurant-list" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-3 bg-gray-50">
+                </div>
+        </div>
+
+        <div id="map-container" class="flex-1 relative z-10 bg-gray-200 h-full w-full">
+            <div id="map" class="h-full w-full outline-none"></div>
+        </div>
+
+    </div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="app.js"></script> 

@@ -26,6 +26,12 @@ public class McdAppApplication {
 			repository.save(new Location("McDonald's München Stachus", 48.1391, 11.5658));
 			repository.save(new Location("McDonald's Hamburg Reeperbahn", 53.5496, 9.9668));
             repository.save(new Location("McDonald's Köln Dom", 50.9413, 6.9583));
+			// Ravensburg (Zentrum)
+			repository.save(new Location("McDonald's Ravensburg", 47.7819, 9.6133));
+			// Friedrichshafen (ca. 20km weg -> sollte angezeigt werden)
+			repository.save(new Location("McDonald's Friedrichshafen", 47.6542, 9.4793));
+			// Ulm (ca. 80km weg -> sollte NICHT angezeigt werden im 25km Radius)
+			repository.save(new Location("McDonald's Ulm", 48.4011, 9.9876));
             
             System.out.println("✅ --- TESTDATEN GELADEN --- ✅");
 		};
