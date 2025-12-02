@@ -12,14 +12,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/locations")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*") // Erlaubt Zugriff vom Frontend (auch von anderen Ports)
 public class LocationController {
 
     @Autowired
-    private LocationRepository repository;
+    private LocationRepository locationRepository;
 
     @GetMapping
     public List<Location> getAllLocations() {
-        return repository.findAll();
+        System.out.println("API Aufruf: Lade alle Standorte aus der DB...");
+        return locationRepository.findAll();
     }
 }

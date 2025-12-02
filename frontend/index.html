@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>McDonald's Restaurants</title>
+    <title>McDonald's Finder</title>
+    <link rel="icon" href="data:,">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
                     colors: {
                         mcdYellow: '#ffbc0d',
                         mcdRed: '#db0007',
@@ -23,43 +28,65 @@
             }
         }
     </script>
-    <style>
-        /* Custom Scrollbar für die Liste */
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #ffbc0d; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-100 h-screen flex flex-col font-sans overflow-hidden">
+<body class="bg-gray-100 h-screen flex flex-col font-sans overflow-hidden text-gray-800">
 
-    <header class="bg-white p-4 shadow-md z-30 flex justify-between items-center h-16 shrink-0 relative">
-        <div class="flex items-center gap-3">
-            <div class="bg-mcdRed w-9 h-9 rounded flex items-center justify-center text-mcdYellow font-bold text-xl shadow-sm">M</div>
-            <h1 class="text-xl font-bold text-gray-800 tracking-tight">Restaurant Finder</h1>
+    <header class="bg-white px-4 py-3 shadow-md z-30 flex justify-between items-center h-16 shrink-0 relative gap-4 border-b border-gray-100">
+        
+        <div class="flex items-center gap-3 hidden md:flex min-w-fit">
+            <div class="bg-mcdRed w-10 h-10 rounded-lg flex items-center justify-center text-mcdYellow font-bold text-2xl shadow-sm transform rotate-3">M</div>
+            <h1 class="text-xl font-bold text-gray-900 tracking-tight">Finder</h1>
         </div>
-        <button id="btn-toggle-favs" class="text-sm font-semibold text-gray-600 bg-gray-50 px-4 py-2 rounded-full border border-gray-200 hover:bg-mcdYellow hover:text-black hover:border-mcdYellow transition shadow-sm">
-            <i class="fa-regular fa-heart mr-2"></i> Favoriten
-        </button>
+
+        <div class="flex-1 max-w-xl relative">
+            <div class="relative group">
+                <input type="text" id="search-input" placeholder="Stadt oder PLZ suchen..." 
+                    class="w-full bg-gray-100 border border-transparent rounded-full py-2.5 pl-5 pr-12 text-gray-700 focus:ring-2 focus:ring-mcdYellow focus:bg-white focus:border-gray-200 transition outline-none shadow-sm group-hover:bg-white group-hover:shadow-md"
+                    onkeydown="if(event.key === 'Enter') sucheOrt()">
+                
+                <button onclick="sucheOrt()" class="absolute right-1.5 top-1.5 bottom-1.5 bg-mcdYellow text-mcdDark rounded-full w-9 h-9 flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-sm font-bold">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 min-w-fit">
+            <button onclick="ermittleStandort()" class="md:flex hidden items-center justify-center w-10 h-10 rounded-full bg-gray-50 text-gray-600 border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition tooltip" title="Meinen Standort verwenden">
+                <i class="fa-solid fa-location-crosshairs text-lg"></i>
+            </button>
+            
+            <button id="btn-toggle-favs" class="text-sm font-semibold text-gray-600 bg-white px-4 py-2.5 rounded-full border border-gray-200 hover:bg-gray-50 hover:shadow-sm transition whitespace-nowrap flex items-center gap-2">
+                <i class="fa-regular fa-heart text-lg"></i> <span class="hidden sm:inline">Favoriten</span>
+            </button>
+        </div>
     </header>
 
     <div class="flex-1 flex flex-row overflow-hidden relative">
         
-        <div class="w-[400px] min-w-[300px] bg-white border-r border-gray-200 flex flex-col z-20 shadow-xl h-full">
-            
-            <div class="p-4 border-b border-gray-100 bg-gray-50">
-                <h2 id="list-title" class="text-sm font-bold text-gray-500 uppercase tracking-wider">Alle Standorte</h2>
-                <p class="text-xs text-gray-400 mt-1">Sortiert nach Entfernung zu Ravensburg</p>
+        <div class="w-[420px] min-w-[320px] bg-white border-r border-gray-200 flex flex-col z-20 shadow-[4px_0_24px_rgba(0,0,0,0.05)] h-full">
+            <div class="p-5 border-b border-gray-100 bg-white">
+                <div class="flex justify-between items-baseline mb-1">
+                    <h2 id="list-title" class="text-base font-bold text-gray-800">Ergebnisse</h2>
+                    <span id="result-count" class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">0</span>
+                </div>
+                <p id="current-location-label" class="text-xs text-mcdRed font-semibold flex items-center truncate opacity-80">
+                    <i class="fa-solid fa-location-dot mr-1.5"></i> Suche läuft...
+                </p>
             </div>
-
-            <div id="restaurant-list" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-3 bg-gray-50">
+            
+            <div id="restaurant-list" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-3 bg-gray-50/50">
                 </div>
         </div>
 
-        <div id="map-container" class="flex-1 relative z-10 bg-gray-200 h-full w-full">
+        <div id="map-container" class="flex-1 relative z-10 bg-gray-100 h-full w-full">
             <div id="map" class="h-full w-full outline-none"></div>
+            
+            <div class="absolute bottom-6 right-6 z-[1000] bg-white/90 backdrop-blur px-4 py-2 rounded-lg shadow-lg text-xs text-gray-500 hidden md:block border border-gray-100">
+                <span class="mr-3"><i class="fa-solid fa-circle text-mcdYellow text-[10px] mr-1"></i> Restaurant</span>
+                <span><i class="fa-solid fa-circle text-red-600 text-[10px] mr-1"></i> Du</span>
+            </div>
         </div>
-
     </div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
